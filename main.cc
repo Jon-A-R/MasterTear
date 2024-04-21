@@ -358,18 +358,18 @@ main(int argc, char **argv)
   //Changed
   RNA Alg(&P, &solver, pr);
   ControlVector<VECTOR> q(&DOFH, DOpEtypes::VectorStorageType::fullmem,pr);
-  q = 2.0;
+  q = 5.0;
   Alg.ReInit();
   
   //**************************************************************************************************
  
   try
     {
-      Alg.Solve(q);
+      //Alg.Solve(q);
       
-      //ControlVector<VECTOR> dq(q);
-      //const double eps_diff = 1.0e-2;
-      //Alg.CheckGrads(eps_diff, q, dq, 4);
+      ControlVector<VECTOR> dq(q);
+      const double eps_diff = 2.7;
+      Alg.CheckGrads(eps_diff, q, dq, 5);
       //Alg.CheckHessian(eps_diff, q, dq, 2);
 
     }

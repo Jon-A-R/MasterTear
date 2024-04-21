@@ -150,7 +150,7 @@ public:
 
       // Necessary because stress splitting does not work
       // in the very initial time step.
-      if (this->GetTime() > 0.001)
+      if (this->GetTime() > 1)
       {
         decompose_stress(stress_term_plus, stress_term_minus,
                          E, tr_E, zero_matrix, 0.0,
@@ -300,7 +300,7 @@ public:
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(stress_term_plus, stress_term_minus,
                        E, tr_E, zero_matrix, 0.0,
@@ -353,7 +353,7 @@ public:
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(zstress_term_plus, zstress_term_minus,
                        E, tr_E, zE, ztr_E,
@@ -380,7 +380,7 @@ public:
 
       // Necessary because stress splitting does not work
       // in the very initial time step.
-      if (this->GetTime() > 0.001)
+      if (this->GetTime() > 1)
       {
         decompose_stress(stress_term_plus_LinU, stress_term_minus_LinU,
                          E, tr_E, E_LinU, tr_E_LinU,
@@ -540,7 +540,7 @@ ElementEquation_UT(
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(stress_term_plus, stress_term_minus,
                        E, tr_E, zero_matrix, 0.0,
@@ -593,7 +593,7 @@ ElementEquation_UT(
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(dustress_term_plus, dustress_term_minus,
                        E, tr_E, duE, dutr_E,
@@ -621,7 +621,7 @@ ElementEquation_UT(
 
       // Necessary because stress splitting does not work
       // in the very initial time step.
-      if (this->GetTime() > 0.001)
+      if (this->GetTime() > 1)
       {
         decompose_stress(stress_term_plus_LinU, stress_term_minus_LinU,
                          E, tr_E, E_LinU, tr_E_LinU,
@@ -644,7 +644,7 @@ ElementEquation_UT(
                                      // Main terms
                                      (1 - constant_k_) * (scalar_product(dustress_term_plus, E) + scalar_product(stress_term_plus, duE)) * pf * phi_pf[i] 
                                      + (1 - constant_k_) * scalar_product(stress_term_plus, E) * duPf * phi_pf[i]                                         
-                                     + qvalues_[0] / (alpha_eps_)* duPf * phi_pf[i]                                                                        
+                                     + (qvalues_[0] / alpha_eps_)* duPf * phi_pf[i]                                                                        
                                      + qvalues_[0] * alpha_eps_ * grad_duPf * phi_grads_pf[i]                                                             
                                      ) *
                          state_fe_values.JxW(q_point);
@@ -670,14 +670,14 @@ ElementEquation_UT(
           }
           else // max > 0
           {
-            local_vector(i) -= scale * weight * duPf * state_fe_values[multiplier].value(i, q_point);
+            local_vector(i) -= scale * weight * s_ * duPf * state_fe_values[multiplier].value(i, q_point); //TODO Check this
           }
 
             for (unsigned int j = 0; j < n_dofs_per_element; j++) 
             {
                                 if (fabs(state_fe_values[phasefield].value(j, q_point) - 1.) < std::numeric_limits<double>::epsilon()) 
                                 {
-                                    local_vector(j) += scale * weight * s_ * duMult; 
+                                    local_vector(j) += scale * weight * duMult; 
                                 } 
             }
         }
@@ -779,12 +779,12 @@ void ElementEquation_UTT(
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(stress_term_plus, stress_term_minus,
                        E, tr_E, zero_matrix, 0.0,
                        lame_coefficient_lambda_,
-                       lame_coefficient_mu_, false); // false as u terms only appear in sigma, not in deriv sigma
+                       lame_coefficient_mu_, false); 
     }
     else
     {
@@ -832,7 +832,7 @@ void ElementEquation_UTT(
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(dzstress_term_plus, dzstress_term_minus,
                        E, tr_E, dzE, dztr_E,
@@ -859,7 +859,7 @@ void ElementEquation_UTT(
 
       // Necessary because stress splitting does not work
       // in the very initial time step.
-      if (this->GetTime() > 0.001)
+      if (this->GetTime() > 1)
       {
         decompose_stress(stress_term_plus_LinU, stress_term_minus_LinU,
                          E, tr_E, E_LinU, tr_E_LinU,
@@ -884,7 +884,7 @@ void ElementEquation_UTT(
                                      // Main terms
                                      (1 - constant_k_) * (scalar_product(stress_term_plus_LinU, E) + scalar_product(stress_term_plus, E_LinU)) * pf * dzPf // du
                                      + (1 - constant_k_) * scalar_product(stress_term_plus, E) * phi_pf[i] * dzPf                                         // d phi
-                                     + qvalues_[0] / (alpha_eps_)*phi_pf[i] * dzPf                                                                        // d phi
+                                     + (qvalues_[0] / alpha_eps_)*phi_pf[i] * dzPf                                                                        // d phi
                                      + qvalues_[0] * alpha_eps_ * phi_grads_pf[i] * grad_dzPf                                                             // d phi
                                      ) *
                          state_fe_values.JxW(q_point);
@@ -1013,7 +1013,7 @@ void ElementEquation_UU(
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(stress_term_plus, stress_term_minus,
                        E, tr_E, zero_matrix, 0.0,
@@ -1068,7 +1068,7 @@ void ElementEquation_UU(
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(dustress_term_plus, dustress_term_minus,
                        E, tr_E, duE, dutr_E,
@@ -1096,7 +1096,7 @@ void ElementEquation_UU(
 
       // Necessary because stress splitting does not work
       // in the very initial time step.
-      if (this->GetTime() > 0.001)
+      if (this->GetTime() > 1)
       {
         decompose_stress(stress_term_plus_LinU, stress_term_minus_LinU,
                          E, tr_E, E_LinU, tr_E_LinU,
@@ -1112,7 +1112,7 @@ void ElementEquation_UU(
       
       Tensor<2,2> stress_second_deriv_plus;
       Tensor<2,2> stress_second_deriv_minus;
-      if (this->GetTime() > 0.001)
+      if (this->GetTime() > 1)
       {
       decompose_stress_second_deriv(stress_second_deriv_plus, stress_second_deriv_minus,
       E, tr_E, duE, dutr_E,
@@ -1164,6 +1164,7 @@ void ElementEquation_Q(
   zgrads_.resize(n_q_points, vector<Tensor<1, 2>>(4));
   edc.GetValuesState("adjoint", zvalues_);
   edc.GetGradsState("adjoint", zgrads_);
+  
 
   for (unsigned int q_point = 0; q_point < n_q_points; q_point++)
   {
@@ -1472,7 +1473,7 @@ void ElementMatrix(
 
     // Necessary because stress splitting does not work
     // in the very initial time step.
-    if (this->GetTime() > 0.001)
+    if (this->GetTime() > 1)
     {
       decompose_stress(stress_term_plus, stress_term_minus,
                        E, tr_E, zero_matrix, 0.0,
@@ -1500,7 +1501,7 @@ void ElementMatrix(
 
       // Necessary because stress splitting does not work
       // in the very initial time step.
-      if (this->GetTime() > 0.001)
+      if (this->GetTime() > 1)
       {
         decompose_stress(stress_term_plus_LinU, stress_term_minus_LinU,
                          E, tr_E, E_LinU, tr_E_LinU,
@@ -1516,6 +1517,7 @@ void ElementMatrix(
 
       for (unsigned int j = 0; j < n_dofs_per_element; j++)
       {
+      
         // Solid (time-lagged version)
         // This then derivative of first line of (16) to u
         local_matrix(j, i) += scale * (scalar_product(((1 - constant_k_) * old_timestep_pf * old_timestep_pf + constant_k_) * // This is g
@@ -1793,6 +1795,7 @@ inline void decompose_stress_second_deriv(
   const double lame_coefficient_lambda,
   const double lame_coefficient_mu,
   Tensor<2, 2> direction) {
+  /**
   const double h = std::sqrt(std::numeric_limits<double>::epsilon());
   
   Tensor<2,2> stress_term_plus_pos_h;
@@ -1813,6 +1816,9 @@ inline void decompose_stress_second_deriv(
                        lame_coefficient_mu, true);
   stress_term_plus = 1/(2*h) * (stress_term_plus_pos_h - stress_term_plus_neg_h);
   stress_term_minus = 1/(2*h) * (stress_term_minus_pos_h - stress_term_minus_neg_h);
+  **/
+  stress_term_plus = 0;
+  stress_term_minus = 0;
   }
 }
 ;

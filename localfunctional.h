@@ -96,13 +96,17 @@ public:
 
     refvalues_.resize(n_q_points, Vector<double>(4));
     edc.GetValuesState("ReferenceSolution", refvalues_);
+    
+    qvalues_.reinit(1);
+    edc.GetParamValues("control", qvalues_);
 
     double ret = 0;
     for (unsigned int q_point = 0; q_point < n_q_points; q_point++)
       {
         ret += 0.5 * ( (uvalues_[q_point][0] - refvalues_[q_point][0]) * (uvalues_[q_point][0] - refvalues_[q_point][0])
               + (uvalues_[q_point][1] - refvalues_[q_point][1]) * (uvalues_[q_point][1] - refvalues_[q_point][1])
-              + (uvalues_[q_point][2] - refvalues_[q_point][2]) * (uvalues_[q_point][2] - refvalues_[q_point][2]) )
+              + (uvalues_[q_point][2] - refvalues_[q_point][2]) * (uvalues_[q_point][2] - refvalues_[q_point][2])
+              +  0.0000002*(qvalues_(0) - 2.5)*(qvalues_(0) - 2.5))
               * state_fe_values.JxW(q_point);
       }
     return ret;
@@ -144,9 +148,12 @@ public:
 
   void
   ElementValue_Q(
-    const EDC<DH, VECTOR, dealdim> &,
-    dealii::Vector<double> &, double)
+    const EDC<DH, VECTOR, dealdim> &edc,
+    dealii::Vector<double> &local_vector, double scale)
   {
+    qvalues_.reinit(1);
+    edc.GetParamValues("control", qvalues_);
+    local_vector(0) = scale * 0.0000002 * (qvalues_(0) - 2.5);
   }
 
   void
@@ -196,9 +203,12 @@ public:
 
   void
   ElementValue_QQ(
-    const EDC<DH, VECTOR, dealdim> &,
-    dealii::Vector<double> &, double)
+    const EDC<DH, VECTOR, dealdim> &edc,
+    dealii::Vector<double> &local_vector, double scale)
   {
+    qvalues_.reinit(1);
+    edc.GetParamValues("control", qvalues_);
+    local_vector(0) = scale * 0.0000002;
   }
 
   UpdateFlags
@@ -223,6 +233,7 @@ private:
   vector<Vector<double> > uvalues_;
   vector<Vector<double> > refvalues_;
   vector<Vector<double> > duvalues_;
+  Vector<double> qvalues_;
   
   double constant_k_, alpha_eps_, lame_coefficient_mu_, lame_coefficient_lambda_, s_;
 };
