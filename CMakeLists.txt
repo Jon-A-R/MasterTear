@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # Set the name of the project and target:
-SET(TARGET "MasterTest1")
+SET(TARGET "MasterTest2")
 
 # Declare all source files the target consists of:
 SET(TARGET_SRC

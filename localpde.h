@@ -242,8 +242,16 @@ public:
   zgrads_.resize(n_q_points, vector<Tensor<1, 2>>(4));
   edc.GetValuesState("last_newton_solution", zvalues_);
   edc.GetGradsState("last_newton_solution", zgrads_);
-
-  edc.GetValuesState("last_time_solution", last_timestep_uvalues_);
+  
+  double time = this->GetTime();
+  if(abs(time - 0.0075) < std::numeric_limits<double>::epsilon())
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_); //Fallunterscheidung nur zum rumprobieren
+  }
+  else if(abs(time) > std::numeric_limits<double>::epsilon()) 
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_);
+  }
 
   // changed
   qvalues_.reinit(1);
@@ -286,7 +294,20 @@ public:
     grad_pf[1] = ugrads_[q_point][2][1];
 
     double pf = uvalues_[q_point](2);
-    double old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    
+    double old_timestep_pf;
+    if(abs(time - 0.0075) < std::numeric_limits<double>::epsilon())
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else if(abs(time) > std::numeric_limits<double>::epsilon())
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else
+    {
+    old_timestep_pf = 1.0;
+    }
 
     const Tensor<2, 2> E = 0.5 * (grad_u + transpose(grad_u));
     const double tr_E = trace(E);
@@ -473,13 +494,22 @@ ElementEquation_UT(
   last_timestep_uvalues_.resize(n_q_points, Vector<double>(4));
 
   edc.GetValuesState("state", uvalues_); 
+  edc.GetGradsState("state", ugrads_);
 
   duvalues_.resize(n_q_points, Vector<double>(4));
   dugrads_.resize(n_q_points, vector<Tensor<1, 2>>(4));
   edc.GetValuesState("last_newton_solution", duvalues_); 
   edc.GetGradsState("last_newton_solution", dugrads_);
 
-  edc.GetValuesState("last_time_solution", last_timestep_uvalues_);
+  double time = this->GetTime();
+  if(abs(time - 0.0075) < std::numeric_limits<double>::epsilon())
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_); //Fallunterscheidung nur zum rumprobieren
+  }
+  else if(abs(time) > std::numeric_limits<double>::epsilon()) 
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_);
+  }
 
   // changed
   qvalues_.reinit(1);
@@ -526,7 +556,19 @@ ElementEquation_UT(
     grad_pf[1] = ugrads_[q_point][2][1];
 
     double pf = uvalues_[q_point](2);
-    double old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    double old_timestep_pf;
+    if(abs(time - 0.0075) < std::numeric_limits<double>::epsilon())
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else if(abs(time) > std::numeric_limits<double>::epsilon())
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else
+    {
+    old_timestep_pf = 1.0;
+    }
 
     const Tensor<2, 2> E = 0.5 * (grad_u + transpose(grad_u));
     const double tr_E = trace(E);
@@ -609,7 +651,7 @@ ElementEquation_UT(
     for (unsigned int i = 0; i < n_dofs_per_element; i++)
     {
 
-      const Tensor<2, 2> E_LinU = 0.5 * (phi_grads_u[i] + transpose(phi_grads_u[i])); // phi_grads_u are gradients of displacement testfuctions, used here because E_lin is evaluated in these displacements instead of in u
+      const Tensor<2, 2> E_LinU = 0.5 * (phi_grads_u[i] + transpose(phi_grads_u[i])); 
 
       const double tr_E_LinU = trace(E_LinU);
 
@@ -627,7 +669,7 @@ ElementEquation_UT(
                          E, tr_E, E_LinU, tr_E_LinU,
                          lame_coefficient_lambda_,
                          lame_coefficient_mu_,
-                         true); // true, since FE members only appear in derivatives of sigma
+                         true);
       }
       else
       {
@@ -673,12 +715,12 @@ ElementEquation_UT(
             local_vector(i) -= scale * weight * s_ * duPf * state_fe_values[multiplier].value(i, q_point); //TODO Check this
           }
 
-            for (unsigned int j = 0; j < n_dofs_per_element; j++) 
-            {
-                                if (fabs(state_fe_values[phasefield].value(j, q_point) - 1.) < std::numeric_limits<double>::epsilon()) 
-                                {
-                                    local_vector(j) += scale * weight * duMult; 
-                                } 
+          for (unsigned int j = 0; j < n_dofs_per_element; j++) 
+          {
+                              if (fabs(state_fe_values[phasefield].value(j, q_point) - 1.) < std::numeric_limits<double>::epsilon()) 
+                              {
+                                  local_vector(j) += scale * weight * duMult; 
+                              } 
             }
         }
         else // Boundary or hanging node no weight so it works when hanging
@@ -717,7 +759,15 @@ void ElementEquation_UTT(
   edc.GetValuesState("last_newton_solution", dzvalues_); 
   edc.GetGradsState("last_newton_solution", dzgrads_);
 
-  edc.GetValuesState("last_time_solution", last_timestep_uvalues_);
+  double time = this->GetTime();
+  if(abs(time - 0.0075) < std::numeric_limits<double>::epsilon())
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_); //Fallunterscheidung nur zum rumprobieren
+  }
+  else if(abs(time) > std::numeric_limits<double>::epsilon()) 
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_);
+  }
 
   // changed
   qvalues_.reinit(1);
@@ -765,7 +815,19 @@ void ElementEquation_UTT(
     grad_pf[1] = ugrads_[q_point][2][1];
 
     double pf = uvalues_[q_point](2);
-    double old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    double old_timestep_pf;
+    if(abs(time - 0.0075) < std::numeric_limits<double>::epsilon())
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else if(abs(time) > std::numeric_limits<double>::epsilon())
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else
+    {
+    old_timestep_pf = 1.0;
+    }
 
     const Tensor<2, 2> E = 0.5 * (grad_u + transpose(grad_u));
     const double tr_E = trace(E);
@@ -968,7 +1030,15 @@ void ElementEquation_UU(
   edc.GetValuesState("tangent", duvalues_);
   edc.GetGradsState("tangent", dugrads_);
   
-  edc.GetValuesState("last_time_solution", last_timestep_uvalues_);
+  double time = this->GetTime();
+  if(abs(time - 0.0075) < std::numeric_limits<double>::epsilon())
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_); //Fallunterscheidung nur zum rumprobieren
+  }
+  else if(abs(time) > std::numeric_limits<double>::epsilon()) 
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_);
+  }
 
   // declaration of state finite elements and gradients of them
   std::vector<Tensor<2, 2>> phi_grads_u(n_dofs_per_element);
@@ -983,7 +1053,19 @@ void ElementEquation_UU(
       phi_pf[k] = state_fe_values[phasefield].value(k, q_point);
     }
     
-    double old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    double old_timestep_pf;
+    if(abs(time - 0.0075) < std::numeric_limits<double>::epsilon())
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else if(abs(time) > std::numeric_limits<double>::epsilon())
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else
+    {
+    old_timestep_pf = 1.0;
+    }
     
     Tensor<2, 2> grad_u;
     grad_u.clear();
@@ -1133,8 +1215,7 @@ void ElementEquation_UU(
                          state_fe_values.JxW(q_point);
       
       
-      local_vector(i) += scale * (
-                                     
+      local_vector(i) += scale * (              
                                      (1 - constant_k_) * (scalar_product(stress_second_deriv_plus, E) + scalar_product(dustress_term_plus, E_LinU) 
                                      + scalar_product(stress_term_plus_LinU, duE)) * pf * zPf 
                                      + (1 - constant_k_) * ( scalar_product(stress_term_plus_LinU, E) + scalar_product(stress_term_plus, E_LinU) )* duPf * zPf
@@ -1227,8 +1308,7 @@ void ElementEquation_QT(
       const double phi_i_pf = state_fe_values[phasefield].value(i, q_point);
       const Tensor<1, 2> phi_i_grads_pf = state_fe_values[phasefield].gradient(i, q_point);
 
-      local_vector(i) +=
-          scale * (-1 / alpha_eps_ * (1 - pf) * phi_i_pf + alpha_eps_ * grad_pf * phi_i_grads_pf) * dqvalues_[0] * state_fe_values.JxW(q_point);
+      local_vector(i) +=scale * (-1 / alpha_eps_ * (1 - pf) * phi_i_pf + alpha_eps_ * grad_pf * phi_i_grads_pf) * dqvalues_[0] * state_fe_values.JxW(q_point);
     }
   }
 }
@@ -1400,19 +1480,25 @@ void ElementMatrix(
   ugrads_.resize(n_q_points, vector<Tensor<1, 2>>(4));
   last_timestep_uvalues_.resize(n_q_points, Vector<double>(4));
   
+  double time = this->GetTime();
   if(this->problem_type_ == "state")
   {
   edc.GetValuesState("last_newton_solution", uvalues_);
   edc.GetGradsState("last_newton_solution", ugrads_);
+  
+  edc.GetValuesState("last_time_solution", last_timestep_uvalues_);
   }
   else
   {
   edc.GetValuesState("state", uvalues_);
   edc.GetGradsState("state", ugrads_);
+  
+  if(abs(time) > std::numeric_limits<double>::epsilon())
+  {
+  edc.GetValuesState("state_i-1", last_timestep_uvalues_);
   }
-
-  edc.GetValuesState("last_time_solution", last_timestep_uvalues_);
-
+  }
+  
   // changed
   qvalues_.reinit(1);
   edc.GetParamValues("control", qvalues_);
@@ -1459,7 +1545,16 @@ void ElementMatrix(
     grad_pf[1] = ugrads_[q_point][2][1];
 
     double pf = uvalues_[q_point](2);
-    double old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    double old_timestep_pf;
+    if(abs(time) > std::numeric_limits<double>::epsilon() || this->problem_type_ == "state")
+    {
+    old_timestep_pf = last_timestep_uvalues_[q_point](2);
+    }
+    else
+    {
+    old_timestep_pf = 1.0;
+    }
+    
 
     const Tensor<2, 2> E = 0.5 * (grad_u + transpose(grad_u));
     const double tr_E = trace(E);
@@ -1601,7 +1696,7 @@ void ControlElementMatrix(
     const EDC<DH, VECTOR, dealdim> &edc,
     FullMatrix<double> &local_matrix, double scale)
 {
-  local_matrix(0, 0) = scale;
+  local_matrix(0, 0) += scale; //TODO check whether matrix really 1x1
 }
 
   void

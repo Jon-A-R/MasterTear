@@ -52,7 +52,7 @@ subsection output parameters
 
   # Do not write files whose name contains a substring given here by a list of
   # `;` separated words
-  set never_write_list  = Residual;Hessian;Tangent;Update
+  set never_write_list  = Residual;Hessian;Tangent;Update;Adjoint;Gradient;State
   #set never_write_list  = Gradient;Hessian;Tangent;Adjoint
       
   # Defines what strings should be printed, the higher the number the more
@@ -68,6 +68,18 @@ subsection output parameters
 
   # Directory where the output goes to
   set results_dir       = Results/
+end
+
+subsection reducednewtonalgorithm parameters
+  set line_maxiter         = 5
+  set linear_global_tol    = 1.e-11
+  set linear_maxiter       = 200
+  set linear_tol           = 1.e-10
+  set linesearch_c         = 0.1
+  set linesearch_rho       = 0.9
+  set nonlinear_global_tol = 1.e-10
+  set nonlinear_maxiter    = 1500
+  set nonlinear_tol        = 1.e-10
 end
 
 

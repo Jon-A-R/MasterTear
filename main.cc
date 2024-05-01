@@ -67,6 +67,7 @@
 
 // Timestepping scheme
 #include <tsschemes/backward_euler_problem.h>
+#include <tsschemes/forward_euler_problem.h>
 #include <tsschemes/crank_nicolson_problem.h>
 #include <tsschemes/shifted_crank_nicolson_problem.h>
 #include <tsschemes/fractional_step_theta_problem.h>
@@ -358,7 +359,7 @@ main(int argc, char **argv)
   //Changed
   RNA Alg(&P, &solver, pr);
   ControlVector<VECTOR> q(&DOFH, DOpEtypes::VectorStorageType::fullmem,pr);
-  q = 5.0;
+  q = 2.0;
   Alg.ReInit();
   
   //**************************************************************************************************
@@ -369,8 +370,8 @@ main(int argc, char **argv)
       
       ControlVector<VECTOR> dq(q);
       const double eps_diff = 2.7;
-      Alg.CheckGrads(eps_diff, q, dq, 5);
-      //Alg.CheckHessian(eps_diff, q, dq, 2);
+      //Alg.CheckGrads(eps_diff, q, dq, 3,0.0001);
+      Alg.CheckHessian(eps_diff, q, dq, 3,0.0001);
 
     }
   catch (DOpEException &e)

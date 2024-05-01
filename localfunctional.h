@@ -106,9 +106,10 @@ public:
         ret += 0.5 * ( (uvalues_[q_point][0] - refvalues_[q_point][0]) * (uvalues_[q_point][0] - refvalues_[q_point][0])
               + (uvalues_[q_point][1] - refvalues_[q_point][1]) * (uvalues_[q_point][1] - refvalues_[q_point][1])
               + (uvalues_[q_point][2] - refvalues_[q_point][2]) * (uvalues_[q_point][2] - refvalues_[q_point][2])
-              +  0.0000002*(qvalues_(0) - 2.5)*(qvalues_(0) - 2.5))
-              * state_fe_values.JxW(q_point);
+              + 0.00000002*(qvalues_(0) - 2.5)*(qvalues_(0) - 2.5))
+              * state_fe_values.JxW(q_point); 
       }
+
     return ret;
   }
 
@@ -151,9 +152,17 @@ public:
     const EDC<DH, VECTOR, dealdim> &edc,
     dealii::Vector<double> &local_vector, double scale)
   {
+    const DOpEWrapper::FEValues<dealdim> &state_fe_values = edc.GetFEValuesState();
+    unsigned int n_q_points = edc.GetNQPoints();
+
+    refvalues_.resize(n_q_points, Vector<double>(4));
     qvalues_.reinit(1);
     edc.GetParamValues("control", qvalues_);
-    local_vector(0) = scale * 0.0000002 * (qvalues_(0) - 2.5);
+
+    for (unsigned int q_point = 0; q_point < n_q_points; q_point++)
+    {
+    local_vector(0) += scale * 0.00000002 * (qvalues_(0) - 2.5) *  state_fe_values.JxW(q_point);
+    }
   }
 
   void
@@ -206,9 +215,17 @@ public:
     const EDC<DH, VECTOR, dealdim> &edc,
     dealii::Vector<double> &local_vector, double scale)
   {
+     const DOpEWrapper::FEValues<dealdim> &state_fe_values = edc.GetFEValuesState();
+    unsigned int n_q_points = edc.GetNQPoints();
+
+    refvalues_.resize(n_q_points, Vector<double>(4));
     qvalues_.reinit(1);
     edc.GetParamValues("control", qvalues_);
-    local_vector(0) = scale * 0.0000002;
+
+    for (unsigned int q_point = 0; q_point < n_q_points; q_point++)
+    {
+    local_vector(0) += scale * 0.00000002 * state_fe_values.JxW(q_point);
+    }
   }
 
   UpdateFlags
